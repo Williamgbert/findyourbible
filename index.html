@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Translation Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'garamond': ['EB Garamond', 'serif'],
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        'parchment': '#f8fafc',
+                        'soft-blue': '#64748b',
+                        'ocean': '#0ea5e9',
+                        'deep-blue': '#1e40af',
+                        'sky': '#38bdf8'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-parchment min-h-screen font-inter">
+    <!-- Header -->
+    <header class="text-center py-8">
+        <h1 class="font-garamond text-4xl md:text-5xl font-semibold text-deep-blue mb-2">Find Your Bible</h1>
+        <p class="text-soft-blue text-lg">Discover the translation that speaks to your heart</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 pb-12">
+        <!-- Introduction Section -->
+        <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-8 transition-all duration-500">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-ocean to-sky rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-2xl">📖</span>
+                </div>
+                <h2 class="font-garamond text-3xl font-semibold text-deep-blue mb-4">Why Different Translations?</h2>
+                <p class="text-gray-700 text-lg leading-relaxed mb-6">
+                    The Bible was originally written in Hebrew, Aramaic, and Greek. Each translation brings unique strengths—some prioritize word-for-word accuracy, others focus on clear, contemporary language. Finding the right translation can deepen your understanding and connection with Scripture.
+                </p>
+                <blockquote class="font-garamond text-xl italic text-soft-blue border-l-4 border-ocean pl-6 mb-8">
+                    "The Scriptures are shallow enough for a child to drink, and deep enough for an elephant to swim."
+                    <footer class="text-base not-italic mt-2">— Augustine of Hippo</footer>
+                </blockquote>
+            </div>
+            <div class="text-center">
+                <button onclick="startQuiz()" class="bg-gradient-to-r from-deep-blue to-ocean text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                    Find My Translation
+                </button>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="bg-white rounded-2xl shadow-lg p-8 md:p-12 hidden transition-all duration-500">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-soft-blue">Progress</span>
+                    <span id="progress-text" class="text-sm font-medium text-soft-blue">1 of 10</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-gradient-to-r from-ocean to-sky h-2 rounded-full transition-all duration-500" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="question-container" class="min-h-[300px]">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between mt-8">
+                <button id="prev-btn" onclick="previousQuestion()" class="px-6 py-3 border-2 border-ocean text-ocean rounded-full font-semibold hover:bg-ocean hover:text-white transition-all duration-300 hidden">
+                    Previous
+                </button>
+                <button id="next-btn" onclick="nextQuestion()" class="px-6 py-3 bg-gradient-to-r from-deep-blue to-ocean text-white rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 ml-auto disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Next
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="bg-white rounded-2xl shadow-lg p-8 md:p-12 hidden transition-all duration-500">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-ocean to-sky rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl">✨</span>
+                </div>
+                <h2 class="font-garamond text-3xl font-semibold text-deep-blue mb-4">Your Recommended Translations</h2>
+                <p class="text-gray-700 text-lg">Based on your preferences, here are the translations that best suit you:</p>
+            </div>
+
+            <div id="recommendations" class="space-y-6 mb-8">
+                <!-- Recommendations will be dynamically inserted here -->
+            </div>
+
+            <div class="text-center space-x-4">
+                <button onclick="retakeQuiz()" class="px-6 py-3 border-2 border-ocean text-ocean rounded-full font-semibold hover:bg-ocean hover:text-white transition-all duration-300">
+                    Retake Quiz
+                </button>
+                <button onclick="downloadResults()" class="px-6 py-3 bg-gradient-to-r from-deep-blue to-ocean text-white rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                    Download Results
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-soft-blue">
+        <p>&copy; 2024 Bible Translation Finder. Made with ❤️ for Scripture study.</p>
+    </footer>
+
+    <script>
+        // Quiz data and state
+        const questions = [
+            {
+                id: 1,
+                question: "What is your primary purpose for reading the Bible?",
+                options: [
+                    { text: "Personal devotional reading and prayer", value: "devotional" },
+                    { text: "In-depth study and research", value: "study" },
+                    { text: "Teaching or preaching to others", value: "teaching" },
+                    { text: "Casual exploration and learning", value: "casual" }
+                ]
+            },
+            {
+                id: 2,
+                question: "How would you describe your Bible reading experience?",
+                options: [
+                    { text: "I'm new to reading the Bible", value: "beginner" },
+                    { text: "I read occasionally but want to read more", value: "intermediate" },
+                    { text: "I'm a regular Bible reader", value: "experienced" },
+                    { text: "I study the Bible extensively", value: "advanced" }
+                ]
+            },
+            {
+                id: 3,
+                question: "Which translation approach do you prefer?",
+                options: [
+                    { text: "Word-for-word accuracy (more literal)", value: "literal" },
+                    { text: "Thought-for-thought clarity (more readable)", value: "dynamic" },
+                    { text: "A balance between accuracy and readability", value: "balanced" },
+                    { text: "I'm not sure what I prefer", value: "unsure" }
+                ]
+            },
+            {
+                id: 4,
+                question: "What language style appeals to you most?",
+                options: [
+                    { text: "Traditional, formal language (like classic literature)", value: "traditional" },
+                    { text: "Contemporary, everyday language", value: "contemporary" },
+                    { text: "Somewhere in between", value: "moderate" },
+                    { text: "Poetic and expressive language", value: "poetic" }
+                ]
+            },
+            {
+                id: 5,
+                question: "How will you primarily use this Bible?",
+                options: [
+                    { text: "Private reading and meditation", value: "private" },
+                    { text: "Small group or family study", value: "group" },
+                    { text: "Public reading or teaching", value: "public" },
+                    { text: "Academic or theological study", value: "academic" }
+                ]
+            },
+            {
+                id: 6,
+                question: "What's most important to you in a Bible translation?",
+                options: [
+                    { text: "Easy to understand and read", value: "readability" },
+                    { text: "Faithful to original languages", value: "accuracy" },
+                    { text: "Beautiful, inspiring language", value: "beauty" },
+                    { text: "Widely used and trusted", value: "popularity" }
+                ]
+            },
+            {
+                id: 7,
+                question: "How much time do you typically spend reading the Bible?",
+                options: [
+                    { text: "A few minutes during daily devotions", value: "brief" },
+                    { text: "15-30 minutes for personal study", value: "moderate" },
+                    { text: "1+ hours for deep study sessions", value: "extended" },
+                    { text: "It varies depending on my schedule", value: "flexible" }
+                ]
+            },
+            {
+                id: 8,
+                question: "What type of notes or study aids do you prefer?",
+                options: [
+                    { text: "Minimal footnotes - I prefer clean text", value: "minimal" },
+                    { text: "Helpful explanatory notes", value: "explanatory" },
+                    { text: "Extensive cross-references and commentary", value: "comprehensive" },
+                    { text: "I don't use study notes much", value: "none" }
+                ]
+            },
+            {
+                id: 9,
+                question: "Which biblical genres do you find most challenging to understand?",
+                options: [
+                    { text: "Poetry and Psalms", value: "poetry" },
+                    { text: "Prophetic books", value: "prophetic" },
+                    { text: "Paul's letters and theology", value: "epistles" },
+                    { text: "Old Testament narratives", value: "narrative" }
+                ]
+            },
+            {
+                id: 10,
+                question: "What draws you most to Scripture reading?",
+                options: [
+                    { text: "Spiritual comfort and encouragement", value: "comfort" },
+                    { text: "Intellectual understanding and learning", value: "learning" },
+                    { text: "Practical guidance for daily life", value: "practical" },
+                    { text: "Connection with God through His Word", value: "connection" }
+                ]
+            }
+        ];
+
+        const translations = {
+            "NIV": {
+                name: "New International Version (NIV)",
+                description: "Balances readability and accuracy; ideal for personal reading and teaching. Most popular modern translation.",
+                link: "https://www.biblegateway.com/versions/New-International-Version-NIV-Bible/",
+                strengths: ["Clear, contemporary language", "Widely trusted", "Good for all purposes"]
+            },
+            "ESV": {
+                name: "English Standard Version (ESV)",
+                description: "Word-for-word translation with modern English; excellent for study and teaching.",
+                link: "https://www.biblegateway.com/versions/English-Standard-Version-ESV-Bible/",
+                strengths: ["Literal accuracy", "Readable English", "Great for study"]
+            },
+            "NLT": {
+                name: "New Living Translation (NLT)",
+                description: "Thought-for-thought translation in clear, contemporary English; perfect for new readers.",
+                link: "https://www.biblegateway.com/versions/New-Living-Translation-NLT-Bible/",
+                strengths: ["Very readable", "Contemporary language", "Great for beginners"]
+            },
+            "CSB": {
+                name: "Christian Standard Bible (CSB)",
+                description: "Optimal blend of accuracy and readability; excellent for study and teaching.",
+                link: "https://www.biblegateway.com/versions/Christian-Standard-Bible-CSB/",
+                strengths: ["Balance of accuracy and clarity", "Modern scholarship", "Versatile"]
+            },
+            "NASB": {
+                name: "New American Standard Bible (NASB)",
+                description: "Highly literal translation; preferred for detailed study and research.",
+                link: "https://www.biblegateway.com/versions/New-American-Standard-Bible-NASB/",
+                strengths: ["Word-for-word accuracy", "Consistent translation", "Study-focused"]
+            },
+            "KJV": {
+                name: "King James Version (KJV)",
+                description: "Classic translation with beautiful, traditional language; rich literary heritage.",
+                link: "https://www.biblegateway.com/versions/King-James-Version-KJV-Bible/",
+                strengths: ["Traditional language", "Literary beauty", "Historical significance"]
+            },
+            "MSG": {
+                name: "The Message (MSG)",
+                description: "Contemporary paraphrase in everyday language; great for fresh perspective.",
+                link: "https://www.biblegateway.com/versions/Message-MSG-Bible/",
+                strengths: ["Very contemporary", "Fresh perspective", "Easy to understand"]
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = {};
+
+        // Load saved answers from localStorage
+        function loadSavedAnswers() {
+            const saved = localStorage.getItem('bibleFinderAnswers');
+            if (saved) {
+                answers = JSON.parse(saved);
+            }
+        }
+
+        // Save answers to localStorage
+        function saveAnswers() {
+            localStorage.setItem('bibleFinderAnswers', JSON.stringify(answers));
+        }
+
+        // Start the quiz
+        function startQuiz() {
+            loadSavedAnswers();
+            document.getElementById('intro').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            showQuestion(0);
+        }
+
+        // Show a specific question
+        function showQuestion(index) {
+            currentQuestion = index;
+            const question = questions[index];
+            const container = document.getElementById('question-container');
+            
+            // Update progress
+            document.getElementById('progress-text').textContent = `${index + 1} of ${questions.length}`;
+            document.getElementById('progress-bar').style.width = `${((index + 1) / questions.length) * 100}%`;
+            
+            // Create question HTML
+            container.innerHTML = `
+                <div class="fade-in">
+                    <h3 class="font-garamond text-2xl font-semibold text-deep-blue mb-6">${question.question}</h3>
+                    <div class="space-y-3">
+                        ${question.options.map(option => `
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-ocean hover:bg-ocean hover:bg-opacity-10 transition-all duration-300 ${answers[question.id] === option.value ? 'border-ocean bg-ocean bg-opacity-10' : ''}">
+                                <input type="radio" name="q${question.id}" value="${option.value}" class="sr-only" onchange="selectAnswer(${question.id}, '${option.value}')">
+                                <div class="w-5 h-5 border-2 border-ocean rounded-full mr-4 flex items-center justify-center ${answers[question.id] === option.value ? 'bg-ocean' : ''}">
+                                    ${answers[question.id] === option.value ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''}
+                                </div>
+                                <span class="text-gray-700 font-medium">${option.text}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').classList.toggle('hidden', index === 0);
+            document.getElementById('next-btn').disabled = !answers[question.id];
+            
+            if (index === questions.length - 1) {
+                document.getElementById('next-btn').textContent = 'See Results';
+            } else {
+                document.getElementById('next-btn').textContent = 'Next';
+            }
+        }
+
+        // Select an answer
+        function selectAnswer(questionId, value) {
+            answers[questionId] = value;
+            saveAnswers();
+            document.getElementById('next-btn').disabled = false;
+            
+            // Update visual selection
+            const labels = document.querySelectorAll(`input[name="q${questionId}"]`).forEach(input => {
+                const label = input.closest('label');
+                const circle = label.querySelector('div');
+                if (input.value === value) {
+                    label.classList.add('border-ocean', 'bg-ocean', 'bg-opacity-10');
+                    circle.classList.add('bg-ocean');
+                    circle.innerHTML = '<div class="w-2 h-2 bg-white rounded-full"></div>';
+                } else {
+                    label.classList.remove('border-ocean', 'bg-ocean', 'bg-opacity-10');
+                    circle.classList.remove('bg-ocean');
+                    circle.innerHTML = '';
+                }
+            });
+        }
+
+        // Go to next question
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                showQuestion(currentQuestion + 1);
+            } else {
+                showResults();
+            }
+        }
+
+        // Go to previous question
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        // Calculate and show results
+        function showResults() {
+            const recommendations = calculateRecommendations();
+            
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            
+            const container = document.getElementById('recommendations');
+            container.innerHTML = recommendations.map((rec, index) => `
+                <div class="border-2 border-gray-200 rounded-lg p-6 hover:border-ocean transition-all duration-300">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gradient-to-br from-ocean to-sky rounded-full flex items-center justify-center text-white font-bold mr-4">
+                                ${index + 1}
+                            </div>
+                            <h3 class="font-garamond text-xl font-semibold text-deep-blue">${rec.name}</h3>
+                        </div>
+                        <span class="text-sm bg-ocean bg-opacity-20 text-ocean px-3 py-1 rounded-full">${rec.match}% match</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">${rec.description}</p>
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-deep-blue mb-2">Key Strengths:</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            ${rec.strengths.map(strength => `<li>${strength}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <a href="${rec.link}" target="_blank" class="inline-flex items-center text-ocean hover:text-deep-blue font-semibold transition-colors duration-300">
+                        Read Online <span class="ml-2">→</span>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        // Calculate recommendations based on answers
+        function calculateRecommendations() {
+            const scores = {};
+            
+            // Initialize scores
+            Object.keys(translations).forEach(key => {
+                scores[key] = 0;
+            });
+            
+            // Score based on answers
+            if (answers[1] === 'devotional') {
+                scores.NIV += 3; scores.NLT += 3; scores.CSB += 2;
+            } else if (answers[1] === 'study') {
+                scores.ESV += 3; scores.NASB += 3; scores.CSB += 2;
+            } else if (answers[1] === 'teaching') {
+                scores.NIV += 3; scores.ESV += 2; scores.CSB += 3;
+            } else if (answers[1] === 'casual') {
+                scores.NLT += 3; scores.MSG += 3; scores.NIV += 2;
+            }
+            
+            if (answers[2] === 'beginner') {
+                scores.NLT += 3; scores.NIV += 2; scores.MSG += 2;
+            } else if (answers[2] === 'intermediate') {
+                scores.NIV += 3; scores.CSB += 2; scores.NLT += 2;
+            } else if (answers[2] === 'experienced') {
+                scores.ESV += 3; scores.NIV += 2; scores.CSB += 2;
+            } else if (answers[2] === 'advanced') {
+                scores.NASB += 3; scores.ESV += 3; scores.CSB += 1;
+            }
+            
+            if (answers[3] === 'literal') {
+                scores.NASB += 3; scores.ESV += 3; scores.KJV += 2;
+            } else if (answers[3] === 'dynamic') {
+                scores.NLT += 3; scores.MSG += 3; scores.NIV += 2;
+            } else if (answers[3] === 'balanced') {
+                scores.NIV += 3; scores.CSB += 3; scores.ESV += 2;
+            } else if (answers[3] === 'unsure') {
+                scores.NIV += 2; scores.CSB += 2; scores.NLT += 2;
+            }
+            
+            if (answers[4] === 'traditional') {
+                scores.KJV += 3; scores.NASB += 2; scores.ESV += 1;
+            } else if (answers[4] === 'contemporary') {
+                scores.NLT += 3; scores.MSG += 3; scores.NIV += 2;
+            } else if (answers[4] === 'moderate') {
+                scores.NIV += 3; scores.CSB += 3; scores.ESV += 2;
+            } else if (answers[4] === 'poetic') {
+                scores.KJV += 3; scores.MSG += 2; scores.ESV += 1;
+            }
+            
+            if (answers[5] === 'private') {
+                scores.NLT += 2; scores.NIV += 2; scores.MSG += 1;
+            } else if (answers[5] === 'group') {
+                scores.NIV += 3; scores.CSB += 2; scores.ESV += 2;
+            } else if (answers[5] === 'public') {
+                scores.NIV += 3; scores.ESV += 2; scores.CSB += 2;
+            } else if (answers[5] === 'academic') {
+                scores.NASB += 3; scores.ESV += 3; scores.CSB += 1;
+            }
+            
+            if (answers[6] === 'readability') {
+                scores.NLT += 3; scores.NIV += 2; scores.MSG += 2;
+            } else if (answers[6] === 'accuracy') {
+                scores.NASB += 3; scores.ESV += 3; scores.CSB += 2;
+            } else if (answers[6] === 'beauty') {
+                scores.KJV += 3; scores.ESV += 2; scores.MSG += 1;
+            } else if (answers[6] === 'popularity') {
+                scores.NIV += 3; scores.ESV += 2; scores.KJV += 2;
+            }
+            
+            if (answers[7] === 'brief') {
+                scores.NLT += 2; scores.MSG += 2; scores.NIV += 1;
+            } else if (answers[7] === 'moderate') {
+                scores.NIV += 2; scores.CSB += 2; scores.ESV += 1;
+            } else if (answers[7] === 'extended') {
+                scores.ESV += 3; scores.NASB += 3; scores.CSB += 2;
+            } else if (answers[7] === 'flexible') {
+                scores.NIV += 2; scores.CSB += 2;
+            }
+            
+            if (answers[8] === 'minimal') {
+                scores.ESV += 2; scores.NIV += 2; scores.NLT += 1;
+            } else if (answers[8] === 'explanatory') {
+                scores.NIV += 2; scores.CSB += 2; scores.NLT += 2;
+            } else if (answers[8] === 'comprehensive') {
+                scores.NASB += 3; scores.ESV += 2;
+            } else if (answers[8] === 'none') {
+                scores.MSG += 2; scores.KJV += 1;
+            }
+            
+            if (answers[9] === 'poetry') {
+                scores.NLT += 2; scores.MSG += 3; scores.NIV += 1;
+            } else if (answers[9] === 'prophetic') {
+                scores.ESV += 2; scores.CSB += 2; scores.NIV += 1;
+            } else if (answers[9] === 'epistles') {
+                scores.NLT += 3; scores.NIV += 2; scores.MSG += 2;
+            } else if (answers[9] === 'narrative') {
+                scores.NIV += 2; scores.CSB += 2; scores.NLT += 1;
+            }
+            
+            if (answers[10] === 'comfort') {
+                scores.NLT += 3; scores.MSG += 2; scores.NIV += 2;
+            } else if (answers[10] === 'learning') {
+                scores.ESV += 3; scores.NASB += 2; scores.CSB += 2;
+            } else if (answers[10] === 'practical') {
+                scores.NIV += 3; scores.NLT += 2; scores.MSG += 2;
+            } else if (answers[10] === 'connection') {
+                scores.NIV += 2; scores.ESV += 2; scores.NLT += 2;
+            }
+            
+            // Convert to recommendations
+            const recommendations = Object.entries(scores)
+                .map(([key, score]) => ({
+                    ...translations[key],
+                    match: Math.min(Math.round((score / 30) * 100), 100)
+                }))
+                .filter(rec => rec.match > 25)
+                .sort((a, b) => b.match - a.match)
+                .slice(0, 3);
+            
+            return recommendations;
+        }
+
+        // Retake quiz
+        function retakeQuiz() {
+            answers = {};
+            localStorage.removeItem('bibleFinderAnswers');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            showQuestion(0);
+        }
+
+        // Download results as PDF (simplified version)
+        function downloadResults() {
+            const recommendations = calculateRecommendations();
+            let content = "Bible Translation Finder - Your Results\n\n";
+            
+            recommendations.forEach((rec, index) => {
+                content += `${index + 1}. ${rec.name} (${rec.match}% match)\n`;
+                content += `${rec.description}\n`;
+                content += `Key Strengths: ${rec.strengths.join(', ')}\n`;
+                content += `Read online: ${rec.link}\n\n`;
+            });
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bible-translation-recommendations.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Add fade-in animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'981160375328b2e1',t:'MTc1ODIwNDA5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
